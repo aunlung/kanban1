@@ -22,6 +22,13 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - name: Secret scan (second gate)
+        run: |
+          if grep -rEn --exclude-dir=.git --exclude-dir=.github \
+            -e 'ghp_[A-Za-z0-9]{36}' -e 'github_pat_' -e 'AKIA[0-9A-Z]{16}' \
+            -e '-----BEGIN [A-Z ]*PRIVATE KEY-----' .; then
+            echo "Secret-like content found; aborting deploy."; exit 1
+          fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
